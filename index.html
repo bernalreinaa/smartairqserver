@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo_png.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="logo_png.png">
+  <title>TVOC y eCO2 a Olor</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    #resultado {
+      font-weight:  bold;
+      font-size:  1.2rem;
+      text-align: center;
+    }
+  </style>
+
+</head>
+<body>
+
+<main>
+  <div class="px-4 py-2 my-2 text-center border-bottom">
+    <img class="d-block mx-auto mb-2" src="logo_png.png" alt="" width="250" height="150">
+    <h3 class="display-5 fw-bold" style="font-size: 20px;">Conversión TVOC, eCO2, R1, R2 R3 y R4 a olor utilizando Tensorflow.js</h3>
+    <div class="col-lg-6 mx-auto">
+      <p class="lead mb-0">Introducir TVOC, eCO2, R1, R2 R3 y R4 para detectar un olor</p>
+    </div>
+  </div>
+
+  <div class="b-example-divider"></div>
+
+  <div class="container mt-5">
+    <div class="row">
+        <div class="col-12 col-md-4 offset-md-4">
+            <form>
+                <div class="mb-3">
+                    <label for="tvoc" class="form-label">TVOC:</label>
+                    <input type="number" class="form-control" id="tvoc" placeholder="Ingresa el valor de TVOC (ppb)">
+                </div>
+                <div class="mb-3">
+                    <label for="eco2" class="form-label">eCO2:</label>
+                    <input type="number" class="form-control" id="eco2" placeholder="Ingresa el valor de eCO2 (ppm)" >
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="R1" class="form-label">R1:</label>
+                        <input type="number" class="form-control" id="R1" placeholder="Ingresa el valor de R1 (ohm)">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="R2" class="form-label">R2:</label>
+                        <input type="number" class="form-control" id="R2" placeholder="Ingresa el valor de R2 (ohm)">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="R3" class="form-label">R3:</label>
+                        <input type="number" class="form-control" id="R3" placeholder="Ingresa el valor de R3 (ohm)">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="R4" class="form-label">R4:</label>
+                        <input type="number" class="form-control" id="R4" placeholder="Ingresa el valor de R4 (ohm)" oninput="calcularOlor()">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="resultado" class="form-label">Resultado</label>
+                    <div id="resultado">
+                        Resultado aquí
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+  <div class="b-example-divider"></div>
+
+  <div class=" text-secondary mt-5 px-2 py-2 text-center" >
+    <div class="col-lg-2 mx-auto">
+      <p class="lead mb-0" style="font-size: 20px;">Por: Alejandro Bernal Reina</p>
+    </div>
+  </div>
+
+  <div class="b-example-divider mb-0"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+
+<script type="text/javascript">
+
+  var modelo = null;
+
+  // Cargar modelo
+  (async () => {
+      console.log("Cargando modelo...");
+      modelo = await tf.loadLayersModel("model.json");
+      console.log("Modelo cargado...");
+  })();
+  
+  function calcularOlor() {
+      var tvoc = document.getElementById("tvoc").value;
+      var eco2 = document.getElementById("eco2").value;
+      var R1 = document.getElementById("R1").value;
+      var R2 = document.getElementById("R2").value;
+      var R3 = document.getElementById("R3").value;
+      var R4 = document.getElementById("R4").value;
+
+
+
+
+  
+      if (modelo != null && tvoc !== "" && eco2 !== "") {
+          var tensor = tf.tensor2d([[parseInt(tvoc), parseInt(eco2), parseInt(R1), parseInt(R2), parseInt(R3), parseInt(R4)]]);
+          var prediccion = modelo.predict(tensor);
+          prediccion = Math.round(prediccion, 1);
+          document.getElementById("resultado").innerHTML = "El olor es aproximadamente " + prediccion;
+      } else {
+          //document.getElementById("resultado").innerHTML = "Ingresa valores válidos para TVOC y eCO2";
+          if (modelo == null){
+            document.getElementById("resultado").innerHTML = "modelo nulo";
+          }
+          if (tvoc == ""){
+            document.getElementById("resultado").innerHTML = "tvoc nulo";
+          }
+          if (eco2 == ""){
+            document.getElementById("resultado").innerHTML = "eco2 nulo";
+          }
+      }
+  }
+  
+</script>
+</body>
+</html>
